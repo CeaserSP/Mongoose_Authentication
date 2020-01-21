@@ -44,31 +44,29 @@ app.post("/login", function (req, res, next) {
     console.log('server.js', req.body.logusername);
     console.log('server.js', req.body.logpassword);
     if (error || !user) {
-      var err = new Error('Wrong username or password.');
-      err.status = 401;
-      return next(err);
+      var reasons = User.failedLogin;
+        switch (reason) {
+            case reasons.NOT_FOUND:
+              console.log("not found");
+              break;
+            case reasons.PASSWORD_INCORRECT:
+              console.log("************** incorrect password");
+                // note: these cases are usually treated the same - don't tell
+                // the user *why* the login failed, only that it did
+                break;
+            case reasons.MAX_ATTEMPTS:
+              console.log("too many attempts")
+                // send email or otherwise notify user that account is
+                // temporarily locked
+                break;
+        }
+      // return next(error);
     } else {
-      // req.session.userId = user._id;
+      console.log('login success');
       return res.sendStatus(200);
     }
   });
-}) 
-
-    // otherwise we can determine why we failed
-//     var reasons = User.failedLogin;
-// switch (reason) {
-//   case reasons.NOT_FOUND:
-//   case reasons.PASSWORD_INCORRECT:
-//     // note: these cases are usually treated the same - don't tell
-//     // the user *why* the login failed, only that it did
-//     break;
-//   case reasons.MAX_ATTEMPTS:
-//     // send email or otherwise notify user that account is
-//     // temporarily locked
-//     break;
-// }
-//   });
-// });
+}); 
 
 var PORT = process.env.PORT || 8080;
 app.listen(PORT, function () {
