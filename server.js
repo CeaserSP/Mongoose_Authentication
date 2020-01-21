@@ -2,17 +2,14 @@ var express = require("express");
 var logger = require("morgan");
 var mongoose = require('mongoose')
 var User = require('./models/user.js');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 // var bodyParser = require('body-parser');
 var app = express();
 
 // Use morgan logger for logging requests
 app.use(logger("dev"));
-// Sets up the Express app to handle data parsing
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
-// Make public a static folder
-app.use(express.static("public"));
 // var MONGODB_URI =  'mongodb://localhost:27017/mon_auth';
 // mongoose.connect(MONGODB_URI, {},  function(error) {
 //     console.log("$$$$$$$$$$$$$$$$$$$",error)
@@ -22,8 +19,32 @@ mongoose.connect(connStr, { useNewUrlParser: true }, function (err) {
   if (err) throw err;
   console.log('Successfully connected to MongoDB');
 });
+var db = mongoose.connection;
+//handle mongo error
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  // we're connected!
+});
 
-// Route to post our form submission to mongoDB via mongoose
+//use sessions for tracking logins
+app.use(session({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false,
+  store: new MongoStore({
+    mongooseConnection: db
+  })
+}));
+// Sets up the Express app to handle data parsing
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Make public a static folder
+app.use(express.static("public"));
+
+// ----------------- ROUTES --------------------
+
+// Signup Route to post our form submission to mongoDB via mongoose
 app.post("/signup", function (req, res, next) {
   if (req.body.password !== req.body.passwordConf) {
     var err = new Error('Passwords do not match.');
@@ -43,7 +64,7 @@ app.post("/signup", function (req, res, next) {
     });
 });
 
-// Route to post our form submission to mongoDB via mongoose
+// Login Route to post our form submission to mongoDB via mongoose
 app.post("/login", function (req, res, next) {
   // attempt to authenticate user
   User.authenticate(req.body.logusername, req.body.logpassword, function (error, user, reason) {
@@ -76,6 +97,39 @@ app.post("/login", function (req, res, next) {
     }
   });
 }); 
+
+// GET route after registering
+app.get('/profile', function (req, res, next) {
+  User.findById(req.session.userId)
+    .exec(function (error, user) {
+      if (error) {
+        return next(error);
+      } else {
+        if (user === null) {
+          var err = new Error('Not authorized! Go back!');
+          err.status = 400;
+          return next(err);
+        } else {
+          return res.send('<h1>Name: </h1>' + user.username + '<h2>Mail: </h2>' + user.email + '<br><a type="button" href="/logout">Logout</a>')
+        }
+      }
+    });
+});
+
+
+// GET for logout logout
+app.get('/logout', function (req, res, next) {
+  if (req.session) {
+    // delete session object
+    req.session.destroy(function (err) {
+      if (err) {
+        return next(err);
+      } else {
+        return res.redirect('/');
+      }
+    });
+  }
+});
 
 var PORT = process.env.PORT || 8080;
 app.listen(PORT, function () {
