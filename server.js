@@ -19,28 +19,30 @@ mongoose.connect(connStr, { useNewUrlParser: true }, function (err) {
   if (err) throw err;
   console.log('Successfully connected to MongoDB');
 });
-var db = mongoose.connection;
+// var db = mongoose.connection;
+// console.log(db);
 //handle mongo error
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-  // we're connected!
-});
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function () {
+//   // we're connected!
+// });
 
 //use sessions for tracking logins
-app.use(session({
-  secret: 'work hard',
-  resave: true,
-  saveUninitialized: false,
-  store: new MongoStore({
-    mongooseConnection: db
-  })
-}));
+// app.use(session({
+//   secret: 'work hard',
+//   resave: true,
+//   saveUninitialized: false,
+//   store: new MongoStore({
+//     mongooseConnection: db
+//   })
+// }));
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Make public a static folder
 app.use(express.static("public"));
+app.use(express.static(__dirname + "/public/profile.html"));
 
 // ----------------- ROUTES --------------------
 
@@ -54,9 +56,11 @@ app.post("/signup", function (req, res, next) {
   }
   // Create a new user using req.body
   User.create(req.body)
-    .then(function (dbUser) {
+    .then(function () {
       // If saved successfully, send the the new User document to the client
       res.json(dbUser);
+      // Redirect to html page
+      // res.redirect("/profile");
     })
     .catch(function (err) {
       // If an error occurs, send the error to the client
@@ -99,37 +103,37 @@ app.post("/login", function (req, res, next) {
 }); 
 
 // GET route after registering
-app.get('/profile', function (req, res, next) {
-  User.findById(req.session.userId)
-    .exec(function (error, user) {
-      if (error) {
-        return next(error);
-      } else {
-        if (user === null) {
-          var err = new Error('Not authorized! Go back!');
-          err.status = 400;
-          return next(err);
-        } else {
-          return res.send('<h1>Name: </h1>' + user.username + '<h2>Mail: </h2>' + user.email + '<br><a type="button" href="/logout">Logout</a>')
-        }
-      }
-    });
-});
+// app.get('/profile', function (req, res, next) {
+//   User.findById(req.session.userId)
+//     .exec(function (error, user) {
+//       if (error) {
+//         return next(error);
+//       } else {
+//         if (user === null) {
+//           var err = new Error('Not authorized! Go back!');
+//           err.status = 400;
+//           return next(err);
+//         } else {
+//           return res.send('<h1>Name: </h1>' + user.username + '<h2>Mail: </h2>' + user.email + '<br><a type="button" href="/logout">Logout</a>')
+//         }
+//       }
+//     });
+// });
 
 
-// GET for logout logout
-app.get('/logout', function (req, res, next) {
-  if (req.session) {
-    // delete session object
-    req.session.destroy(function (err) {
-      if (err) {
-        return next(err);
-      } else {
-        return res.redirect('/');
-      }
-    });
-  }
-});
+// // GET for logout logout
+// app.get('/logout', function (req, res, next) {
+//   if (req.session) {
+//     // delete session object
+//     req.session.destroy(function (err) {
+//       if (err) {
+//         return next(err);
+//       } else {
+//         return res.redirect('/');
+//       }
+//     });
+//   }
+// });
 
 var PORT = process.env.PORT || 8080;
 app.listen(PORT, function () {
