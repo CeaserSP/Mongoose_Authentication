@@ -48,14 +48,17 @@ app.post("/login", function (req, res, next) {
         switch (reason) {
             case reasons.NOT_FOUND:
               console.log("not found");
+              res.sendStatus(404);
               break;
             case reasons.PASSWORD_INCORRECT:
-              console.log("************** incorrect password");
+              console.log("incorrect password");
+              res.sendStatus(400);
                 // note: these cases are usually treated the same - don't tell
                 // the user *why* the login failed, only that it did
                 break;
             case reasons.MAX_ATTEMPTS:
-              console.log("too many attempts")
+              console.log("too many attempts");
+              res.sendStatus(429);
                 // send email or otherwise notify user that account is
                 // temporarily locked
                 break;
