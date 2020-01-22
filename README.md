@@ -17,7 +17,6 @@
 
   * [How the app works](#how-app-works)
   * [How the app is built](#how-the-app-is-built)
-  * [MVC design pattern](#about-mvc)
  
 ### <a name="how-app-works"></a> How the app works
 This project allows a user to signup for a website. Then, the user can login to a website with there stored credentials.
@@ -150,6 +149,11 @@ node server.js
 ## <a name="design-improvements"></a> Design improvements
 * Add a session storage and logout functionality.
 * Add a profile page to display user data.
+
+## <a name="Acknowledgments"></a> Acknowledgments
+<p>These are the two sources I used to create this application:
+Primary Source: <a href="http://devsmash.com/blog/password-authentication-with-mongoose-and-bcrypt">http://devsmash.com/blog/password-authentication-with-mongoose-and-bcrypt</a></p>
+<p>Secondary source:<a href="https://medium.com/createdd-notes/starting-with-authentication-a-tutorial-with-node-js-and-mongodb-25d524ca0359">https://medium.com/createdd-notes/starting-with-authentication-a-tutorial-with-node-js-and-mongodb-25d524ca0359</p>
 
 ## <a name ="Issues"></a> Issues
 <p>If you find an issue while using the app or have a request, <a href="https://github.com/CeaserSP/Mongoose_Authentication/issues" target="_blank">log the issue or request here</a>. These issues will be addressed in a future code update.</p>
