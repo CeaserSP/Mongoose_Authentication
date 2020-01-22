@@ -48,6 +48,7 @@ app.use(express.static(__dirname + "/public/profile.html"));
 
 // Signup Route to post our form submission to mongoDB via mongoose
 app.post("/signup", function (req, res, next) {
+  console.log(req.body)
   if (req.body.password !== req.body.passwordConf) {
     var err = new Error('Passwords do not match.');
     err.status = 400;
@@ -56,7 +57,8 @@ app.post("/signup", function (req, res, next) {
   }
   // Create a new user using req.body
   User.create(req.body)
-    .then(function () {
+  // empty function param when doing redirecct
+    .then(function (dbUser) {
       // If saved successfully, send the the new User document to the client
       res.json(dbUser);
       // Redirect to html page
